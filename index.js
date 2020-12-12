@@ -6,13 +6,13 @@ var bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 const server = http.createServer(app);
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
 const WebSocket = require("ws");
 const socket = new WebSocket.Server({ server });
 
 app.get("/", function (req, res) {
-  res.send('Server is running');
+  res.send('Server is running...');
 });
 
 socket.on("connection", function (ws, req) {
