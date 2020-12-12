@@ -12,7 +12,7 @@ const WebSocket = require("ws");
 const socket = new WebSocket.Server({ server });
 
 app.get("/", function (req, res) {
-  res.sendFile(path.join(__dirname + "/index.html"));
+  res.send('Server is running');
 });
 
 socket.on("connection", function (ws, req) {
