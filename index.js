@@ -14,7 +14,7 @@ app.get("/", function (req, res) {
 });
 
 socket.on("connection", function (ws, req) {
-  ws.on("alert_detect", function (message) {
+  ws.on("message", function (message) {
     socket.clients.forEach(function (client) {
       //broadcast incoming message to all clients (s.clients)
       if (client != ws && client.readyState) {
