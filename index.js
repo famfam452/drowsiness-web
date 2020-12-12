@@ -1,7 +1,5 @@
-const express = require("express");
-const app = express();
+const app = require("express")();
 var http = require("http");
-var path = require("path");
 var bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -24,7 +22,6 @@ socket.on("connection", function (ws, req) {
         client.send("broadcast: " + message);
       }
     });
-    // ws.send("From Server only to sender: "+ message); //send to client where message is from
   });
   console.log("new client connected");
 });
