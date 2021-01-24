@@ -1,0 +1,115 @@
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>TripleD</title>
+        <link rel="stylesheet" href="./css/bootstrap.min.css">
+        <script src="./js/jquery.min.js"></script>
+        <script src="./plotlyjs/plotly.js"></script>
+        <link rel="stylesheet" href="./appcss/app.css">
+    </head>
+    <body>
+    <nav class="navbar navbar-light bg-info">
+      <span class="navbar-brand mb-0 mysize">Drowsiness Drive Detection</span>
+    </nav>
+    <div class="container mt-2">
+        <div class="card text-left">
+          <div class="card-body" id="hrvalue">
+            <h4 class="card-title font-weight-bold p-3 mb-2 bg-info" >รายชื่อ</h4>
+            <hr>
+          </div>
+        </div>
+    
+    </div>
+    </body>
+    <script>
+        const websocketWS = new WebSocket("ws://"+location.host+"/",["arduino"]);
+        websocketWS.onopen = function() {
+            websocketWS.send("Hello from browser");
+            $.post("./userlist",{},function(data,status){
+                console.log(data);
+                data.forEach((d) => {
+                    var listname = '';
+                    if(d){
+                        if(d.username && d.fullname){
+                        //listname += '<div>';
+                        listname += '<div class="mysize">';
+                        listname += d.fullname
+                        listname += ' : <span class="badge badge-warning mysize" id="';
+                        listname += d.username;
+                        listname += '">';
+                        listname += 'No Connection';
+                        listname += '</span>';
+                        listname += '</div>';
+                        listname += '<div id="';
+                        listname += 'g';
+                        listname += d.username;
+                        listname += '"><div class="spinner-grow text-danger" role="status"><span class="sr-only">Loading...</span></div></div>';
+                        listname += '<div id="';
+                        listname += 'l';
+                        listname += d.username;
+                        listname += '"><div class="spinner-border text-secondary" role="status"><span class="sr-only">Loading...</span></div></div>';
+                        listname += '<hr>';
+                        $("#hrvalue").append(listname);
+                        var fstgid = '#g';
+                        fstgid += d.username;
+                        var fstlid = '#l';
+                        fstlid += d.username;
+                        $(fstgid).hide();
+                        $(fstlid).show();
+                        }
+                    };
+                });
+    /*             function getData() {
+                    return Math.random();
+                }
+                Plotly.plot('gfamfam452',[{
+                    y:[getData()],
+                    type:'line'
+                }]);
+                var cnt = 0;
+               setInterval(function(){
+                    Plotly.extendTraces('gfamfam452',{y:[[getData()]]}, [0]);
+                    cnt++;
+    
+                    if(cnt > 500){
+                        Plotly.relayout('gfamfam452',{
+                            xaxis: {
+                                range: [cnt-500,cnt]
+                            } 
+                        });
+                    }
+                },15);*/
+            });
+        };
+        websocketWS.onmessage = function(e) {
+            var e_data = e.data;
+            if(e_data[0] == '{'){
+                var dataString = JSON.parse(e_data);
+                if(dataString.client){
+                    var htmlid = '#';
+                    htmlid += dataString.client;
+                    $(htmlid).empty();
+                    $(htmlid).append(dataString.value);
+                    var gid = '#g';
+                    gid += dataString.client;
+                    var lid = '#l';
+                    lid += dataString.client;
+                    if(dataString.event == "SensorUndetect"){
+                        $(gid).hide();
+                        $(lid).show();
+                    } else {
+                        $(gid).show();
+                        $(lid).hide();
+                    }
+    
+                };
+            }
+        };
+        $(document).ready(function(){
+            console.log("doc ready");
+        });
+    
+    </script>
+    </html>
