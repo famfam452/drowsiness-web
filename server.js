@@ -5,7 +5,6 @@ const http = require("http");
 const WebSocket = require("ws");
 const firebase_admin = require("./app/model/firebase");
 const authController = require("./app/controller/auth.controller");
-const userController = require("./app/controller/user.controller");
 const authJWT = require("./app/middleware/authJwt");
 
 const server = http.createServer(app);
@@ -30,27 +29,23 @@ app.get("/", function (req, res) {
 	res.sendFile(path.join(__dirname + "/index.html"));
 });
 
-app.get("/password", function (req, res) {
-	let userRef = db.ref("users");
-	userRef.on("value", (snapshot) => {
-		if (snapshot.child("Nattanon").exists()) {
-			specificUserRef = userRef.child("Nattanon");
-			specificUserRef.once("value", (userData) => {
-				console.log(userData.val()["password"]);
-				console.log(userData.key);
-			});
-		}
-		res.json(snapshot.val());
-	});
-});
-
 app.post("/api/auth/signin", function (req, res) {
 	authController.signin(req, res, db);
 });
 
 app.get("/api/user/data", [authJWT.verifyToken], function (req, res) {
-	// userController.fetchUserData(req, res, db);
-	res.json("Successful fetch data!");
+	let userRef = db.ref(`users/${req.username}`);
+	userRef.once("value", (snapshot) => {
+		res.json(snapshot.val());
+	})
+});
+
+app.get("/api/user/alert", [authJWT.verifyToken], function (req, res) {
+	let notificationRef = db.ref(`users/${req.username}/notification`);
+	notificationRef.once("value", (snapshot) => {
+		console.log(snapshot.val());
+		res.json(snapshot.val());
+	});
 });
 
 wss.on("connection", function (ws, req, client) {

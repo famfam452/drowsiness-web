@@ -5,13 +5,13 @@ var bcrypt = require("bcryptjs");
 exports.signin = (req, res, db) => {
     var userRef = db.ref("users");
 	let username = req.body.username;
-	userRef.on("value", (snapshot) => {
+	userRef.once("value", (snapshot) => {
 		if (snapshot.child(username).exists()) {
 			let specificUserRef = userRef.child(username);
 			specificUserRef.once("value", (userData) => {
 				let password = userData.val()["password"];
-				var passwordIsValid = bcrypt.compareSync(req.body.password, password);
-				if (!passwordIsValid) {
+				var IsPasswordValid = bcrypt.compareSync(req.body.password, password);
+				if (!IsPasswordValid) {
 					return res.status(401).send({
 						accessToken: null,
 						message: "Invalid Password!",
@@ -20,7 +20,7 @@ exports.signin = (req, res, db) => {
 				var token = jwt.sign({username: userData.key}, config.secret, {
 					expiresIn: 86400, // 24 hours
 				});
-
+				console.log('Token: ' + token);
 				res.status(200).send({
 					username: userData.key,
 					accessToken: token,

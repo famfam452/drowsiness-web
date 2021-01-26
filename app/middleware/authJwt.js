@@ -12,7 +12,7 @@ exports .verifyToken = (req, res, next) => {
 			return res.status(401).send({message: "Unauthorized!"});
 		}
         req.username = decoded.username;
-        console.log(`Decode username: ${decoded.name}`)
+        console.log(`Decode username: ${decoded.username}`)
 		next();
 	});
 };
