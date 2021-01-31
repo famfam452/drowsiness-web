@@ -33,63 +33,66 @@ app.post("/api/auth/signin", function (req, res) {
 	authController.signin(req, res, db);
 });
 
+app.post("/api/auth/changePassword", [authJWT.verifyToken], function (req, res) {
+	authController.changePassword(req, res, db);
+});
+
 app.get("/api/user/data", [authJWT.verifyToken], function (req, res) {
 	let userRef = db.ref(`users/${req.username}`);
 	userRef.once("value", (snapshot) => {
 		res.json(snapshot.val());
-	})
+	});
 });
 
 app.get("/api/user/alert", [authJWT.verifyToken], function (req, res) {
 	let notificationRef = db.ref(`users/${req.username}/notification`);
 	notificationRef.once("value", (snapshot) => {
-		console.log(snapshot.val());
 		res.json(snapshot.val());
 	});
 });
 
 wss.on("connection", function (ws, req, client) {
 	console.log("new client connected");
-	console.log(`Client: ${client}`);
 	const pair = "";
+	console.log(`Header: `, req.headers);
 	ws.on("message", function (message) {
-		console.log(req.headers);
 		if (req.headers["client-protocol"] == "arduino") {
-			let whois = req.headers["whois"];
+			let user = req.headers["user"];
 			let predictResult = "";
 			setTimeout(() => {
 				// AI predict
 				predictResult = Math.random() < 0.5;
 				console.log(`Predict: ${predictResult}`);
-				if (predictResult) {
-					let ref = db.ref(`users/${whois}`);
-					let notiRef = ref.child("notification");
-					notiRef.push({
-						dateTime: message,
-					});
-					console.log("Storing data...");
-					ws.send("Drowsiness Alert");
-				}
 			}, 2000);
+			if (predictResult) {
+				let ref = db.ref(`users/${user}`);
+				let notiRef = ref.child("notification");
+				notiRef.push({
+					dateTime: message,
+				});
+				console.log("Storing data...");
+				ws.send("Drowsiness Alert");
+			}
 		}
 	});
 });
 
-function authenticate(req, callback) {}
+// function authenticate(req, callback) {}
 
-server.on("upgrade", function upgrade(request, socket, head) {
-	authenticate(request, (err, client) => {
-		if (err || !client) {
-			socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
-			socket.destroy();
-			return;
-		}
+// server.on("upgrade", function upgrade(request, socket, head) {
+// 	authenticate(request, (err, client) => {
+// 		if (err || !client) {
+// 			console.log("Unauthorized");
+// 			socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
+// 			socket.destroy();
+// 			return;
+// 		}
 
-		wss.handleUpgrade(request, socket, head, function done(ws) {
-			wss.emit("connection", ws, request, client);
-		});
-	});
-});
+// 		wss.handleUpgrade(request, socket, head, function done(ws) {
+// 			wss.emit("connection", ws, request, client);
+// 		});
+// 	});
+// });
 
 server.listen(PORT, () => {
 	console.log(`Server is listening at ${PORT}`);
