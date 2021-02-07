@@ -113,7 +113,7 @@ wss.on("connection", function (ws, req) {
 	});
 
 	ws.on("close", () => {
-		console.log("Disconnect!");
+		console.log(`Disconnect! ${clientProtocol}.${username}`);
 		delete pair[user];
 	});
 });
