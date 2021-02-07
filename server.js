@@ -59,27 +59,38 @@ app.get("/api/user/alert", [authJWT.verifyToken], function (req, res) {
 
 wss.on("connection", function (ws, req) {
 	console.log("new client connected");
-	let username = req.headers["username"];
+	let websocketProtocol = req.headers["sec-websocket-protocol"];
+	let websocketProtocolArray = String(websocketProtocol).split('.');
+	let clientProtocol = websocketProtocolArray[0].slice(0, 6);
+	let username = websocketProtocolArray[1];
+
 	let pairedUser;
-	if(req.headers["client-protocol"] == "device") {
+	let user;
+	if(clientProtocol == "device") {
 		pairedUser = "mobile." + username;
-		let user = "device." + username;
+		user = "device." + username;
 		pair[user] = ws;
 	}
-	else if(req.headers["client-protocol"] == "mobile") {
+	else if(clientProtocol == "mobile") {
 		pairedUser = "device." + username;
-		let user = "mobile." + username;
+		user = "mobile." + username;
 		pair[user] = ws;
 	}
-	
-	ws.on("message", function (message) {
-		if (req.headers["client-protocol"] == "device") {
-			let predictResult;
+
+	function aiPredict(ms) {
+		return new Promise((resolve, reject) => {
 			setTimeout(() => {
 				// AI predict
-				predictResult = Math.random() < 0.5;
+				let predictResult = true;
 				console.log(`Predict: ${predictResult}`);
-			}, 3000);
+				resolve(predictResult);
+			}, ms);
+		})
+	}
+	
+	ws.on("message", async (message) => {
+		if (clientProtocol == "device") {
+			let predictResult = await aiPredict(3000);
 			if (predictResult) {
 				let ref = db.ref(`users/${username}`);
 				let notiRef = ref.child("notification");
@@ -87,14 +98,24 @@ wss.on("connection", function (ws, req) {
 					dateTime: message,
 				});
 				console.log("Storing data...");
-				pair[pairedUser].send({message: "Drowsiness Alert"});
+				pair[pairedUser].send(JSON.stringify({message: "Drowsiness Alert"}));
 			}
-		} else if (req.headers["client-protocol"] == "mobile") {
+			else {
+				console.log('hi')
+			}
+		} else if (clientProtocol == "mobile") {
 		}
+	});
+
+	ws.on("close", () => {
+		console.log("Disconnect!");
+		delete pair[user];
 	});
 });
 
-// function authenticate(req, callback) {}
+
+// function authenticate(req, callback) {
+// }
 
 // server.on("upgrade", function upgrade(request, socket, head) {
 // 	authenticate(request, (err, client) => {

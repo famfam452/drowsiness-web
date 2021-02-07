@@ -24,9 +24,9 @@
     </div>
     </body>
     <script>
-        const websocketWS = new WebSocket("ws://"+location.host+"/",["arduino"]);
+        const websocketWS = new WebSocket("ws://"+location.host+"/",["device.user1"]);
         websocketWS.onopen = function() {
-            websocketWS.send("Hello from browser");
+            websocketWS.send(Date());
             $.post("./userlist",{},function(data,status){
                 console.log(data);
                 data.forEach((d) => {
