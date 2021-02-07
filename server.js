@@ -60,8 +60,12 @@ app.get("/api/user/alert", [authJWT.verifyToken], function (req, res) {
 wss.on("connection", function (ws, req) {
 	console.log("new client connected");
 	let username = req.headers["username"];
-	let pairedUser = "mobile." + username;
-	pair[pairedUser] = ws;
+	let pairedUser;
+	if(req.headers["client-protocol"] == "device") {
+		pairedUser = "mobile." + username;
+		let user = "device." + username;
+		pair[user] = ws;
+	}
 
 	ws.on("message", function (message) {
 		if (req.headers["client-protocol"] == "device") {
