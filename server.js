@@ -89,6 +89,7 @@ wss.on("connection", function (ws, req) {
 	}
 	
 	ws.on("message", async (message) => {
+		console.log(`Message: ${message}`)
 		if (clientProtocol == "device") {
 			let predictResult = await aiPredict(3000);
 			if (predictResult) {
