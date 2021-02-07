@@ -98,7 +98,12 @@ wss.on("connection", function (ws, req) {
 					dateTime: message,
 				});
 				console.log("Storing data...");
-				pair[pairedUser].send(JSON.stringify({message: "Drowsiness Alert"}));
+				if(pair[pairedUser]) {
+					pair[pairedUser].send(JSON.stringify({message: "Drowsiness Alert"}));
+				}
+				else {
+					console.log("No connection")
+				}
 			}
 			else {
 				console.log('hi')
