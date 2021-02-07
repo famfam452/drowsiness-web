@@ -66,7 +66,12 @@ wss.on("connection", function (ws, req) {
 		let user = "device." + username;
 		pair[user] = ws;
 	}
-
+	else if(req.headers["client-protocol"] == "mobile") {
+		pairedUser = "device." + username;
+		let user = "mobile." + username;
+		pair[user] = ws;
+	}
+	
 	ws.on("message", function (message) {
 		if (req.headers["client-protocol"] == "device") {
 			let predictResult;
