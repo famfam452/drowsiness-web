@@ -17,6 +17,8 @@ app.use(bodyParser.urlencoded({extended: true}));
 const firebase = new firebase_admin();
 var db = firebase.admin.database();
 
+let pair = {};
+
 app.use(function (req, res, next) {
 	res.header(
 		"Access-Control-Allow-Headers",
@@ -33,9 +35,13 @@ app.post("/api/auth/signin", function (req, res) {
 	authController.signin(req, res, db);
 });
 
-app.post("/api/auth/changePassword", [authJWT.verifyToken], function (req, res) {
-	authController.changePassword(req, res, db);
-});
+app.post(
+	"/api/auth/changePassword",
+	[authJWT.verifyToken],
+	function (req, res) {
+		authController.changePassword(req, res, db);
+	}
+);
 
 app.get("/api/user/data", [authJWT.verifyToken], function (req, res) {
 	let userRef = db.ref(`users/${req.username}`);
@@ -51,28 +57,30 @@ app.get("/api/user/alert", [authJWT.verifyToken], function (req, res) {
 	});
 });
 
-wss.on("connection", function (ws, req, client) {
+wss.on("connection", function (ws, req) {
 	console.log("new client connected");
-	const pair = "";
-	console.log(`Header: `, req.headers);
+	let username = req.headers["username"];
+	let pairedUser = "mobile." + username;
+	pair[pairedUser] = ws;
+
 	ws.on("message", function (message) {
-		if (req.headers["client-protocol"] == "arduino") {
-			let user = req.headers["user"];
-			let predictResult = "";
+		if (req.headers["client-protocol"] == "device") {
+			let predictResult;
 			setTimeout(() => {
 				// AI predict
 				predictResult = Math.random() < 0.5;
 				console.log(`Predict: ${predictResult}`);
-			}, 2000);
+			}, 3000);
 			if (predictResult) {
-				let ref = db.ref(`users/${user}`);
+				let ref = db.ref(`users/${username}`);
 				let notiRef = ref.child("notification");
 				notiRef.push({
 					dateTime: message,
 				});
 				console.log("Storing data...");
-				ws.send("Drowsiness Alert");
+				pair[pairedUser].send({message: "Drowsiness Alert"});
 			}
+		} else if (req.headers["client-protocol"] == "mobile") {
 		}
 	});
 });
