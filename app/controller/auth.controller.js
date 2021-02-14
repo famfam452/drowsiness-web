@@ -18,11 +18,12 @@ exports.signin = (req, res, db) => {
 					});
 				}
 				var token = jwt.sign({username: userData.key}, config.secret, {
-					expiresIn: 86400, // 24 hours
+					expiresIn: 86400,
 				});
 				res.status(200).send({
 					username: userData.key,
 					accessToken: token,
+					expiresIn: 86400
 				});
 			});
 		} else {

@@ -82,7 +82,6 @@ wss.on("connection", function (ws, req) {
 			setTimeout(() => {
 				// AI predict
 				let predictResult = true;
-				console.log(`Predict: ${predictResult}`);
 				resolve(predictResult);
 			}, ms);
 		})
