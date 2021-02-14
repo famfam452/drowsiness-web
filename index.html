@@ -25,7 +25,7 @@
     </body>
     <script>
         // const websocketWS = new WebSocket("ws://"+location.host+"/",["device.user1"]);
-        const websocketWS = new WebSocket("ws://drowsiness-server2.herokuapp.com",["device.user1"]);
+        const websocketWS = new WebSocket("ws://drowsiness-server2.herokuapp.com",["device.Nattanon"]);
         websocketWS.onopen = function() {
             websocketWS.send(Date());
             $.post("./userlist",{},function(data,status){
