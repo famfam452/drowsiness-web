@@ -4,10 +4,8 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>TripleD</title>
-        <link rel="stylesheet" href="./css/bootstrap.min.css">
-        <script src="./js/jquery.min.js"></script>
-        <script src="./plotlyjs/plotly.js"></script>
-        <link rel="stylesheet" href="./appcss/app.css">
+        <link rel="stylesheet" href="/css/bootstrap.min.css">
+        <script src="/js/jquery.min.js"></script>
     </head>
     <body>
     <nav class="navbar navbar-light bg-info">
@@ -17,100 +15,122 @@
         <div class="card text-left">
           <div class="card-body" id="hrvalue">
             <h4 class="card-title font-weight-bold p-3 mb-2 bg-info" >รายชื่อ</h4>
-            <hr>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Last Notify Time</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="bdinstance">
+              </tbody>
+            </table>
           </div>
         </div>
     
     </div>
     </body>
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/8.4.1/firebase.js"></script>
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+<script src="https://www.gstatic.com/firebasejs/8.4.1/firebase-analytics.js"></script>
     <script>
-        // const websocketWS = new WebSocket("ws://"+location.host+"/",["device.user1"]);
-        const websocketWS = new WebSocket("ws://drowsiness-server2.herokuapp.com",["device.Nattanon"]);
-        websocketWS.onopen = function() {
-            websocketWS.send(Date());
-            $.post("./userlist",{},function(data,status){
-                console.log(data);
-                data.forEach((d) => {
-                    var listname = '';
-                    if(d){
-                        if(d.username && d.fullname){
-                        //listname += '<div>';
-                        listname += '<div class="mysize">';
-                        listname += d.fullname
-                        listname += ' : <span class="badge badge-warning mysize" id="';
-                        listname += d.username;
-                        listname += '">';
-                        listname += 'No Connection';
-                        listname += '</span>';
-                        listname += '</div>';
-                        listname += '<div id="';
-                        listname += 'g';
-                        listname += d.username;
-                        listname += '"><div class="spinner-grow text-danger" role="status"><span class="sr-only">Loading...</span></div></div>';
-                        listname += '<div id="';
-                        listname += 'l';
-                        listname += d.username;
-                        listname += '"><div class="spinner-border text-secondary" role="status"><span class="sr-only">Loading...</span></div></div>';
-                        listname += '<hr>';
-                        $("#hrvalue").append(listname);
-                        var fstgid = '#g';
-                        fstgid += d.username;
-                        var fstlid = '#l';
-                        fstlid += d.username;
-                        $(fstgid).hide();
-                        $(fstlid).show();
-                        }
-                    };
+      var firebaseConfig = {
+        apiKey: "AIzaSyCVQzqFa_6qC0lpqOXgEz_E2Ece48ysmOc",
+        authDomain: "max301esp.firebaseapp.com",
+        databaseURL: "https://max301esp.firebaseio.com",
+        projectId: "max301esp",
+        storageBucket: "max301esp.appspot.com",
+        messagingSenderId: "360433021857",
+        appId: "1:360433021857:web:511b63e744d1f9e5f291e0",
+        measurementId: "G-GBNVQS1444"
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      firebase.analytics();
+        $.get("./getAllUser",function(data){
+            Object.keys(data).forEach(key => {
+                var lastNotiTime = "No data";
+                var nowStatus = "normal";
+                var lowest;
+                var couter = 0;
+                if(data[key]["notification"]){
+                Object.keys(data[key]["notification"]).forEach(k => {
+                  var dateTime = data[key]["notification"][k]["dateTime"];
+                  if(couter == 0){
+                    lowest = new Date(dateTime);
+                    lastNotiTime = dateTime;
+                  }
+                  couter += 1;
+                  var theTimeStamp = new Date(dateTime);
+                  if(theTimeStamp > lowest){
+                    lastNotiTime = dateTime;
+                    lowest = theTimeStamp;
+                  }
                 });
-    /*             function getData() {
-                    return Math.random();
+                nowStatus = data[key]["status"];
                 }
-                Plotly.plot('gfamfam452',[{
-                    y:[getData()],
-                    type:'line'
-                }]);
-                var cnt = 0;
-               setInterval(function(){
-                    Plotly.extendTraces('gfamfam452',{y:[[getData()]]}, [0]);
-                    cnt++;
-    
-                    if(cnt > 500){
-                        Plotly.relayout('gfamfam452',{
-                            xaxis: {
-                                range: [cnt-500,cnt]
-                            } 
-                        });
-                    }
-                },15);*/
-            });
-        };
-        websocketWS.onmessage = function(e) {
-            var e_data = e.data;
-            if(e_data[0] == '{'){
-                var dataString = JSON.parse(e_data);
-                if(dataString.client){
-                    var htmlid = '#';
-                    htmlid += dataString.client;
-                    $(htmlid).empty();
-                    $(htmlid).append(dataString.value);
-                    var gid = '#g';
-                    gid += dataString.client;
-                    var lid = '#l';
-                    lid += dataString.client;
-                    if(dataString.event == "SensorUndetect"){
-                        $(gid).hide();
-                        $(lid).show();
-                    } else {
-                        $(gid).show();
-                        $(lid).hide();
-                    }
-    
-                };
+                var html = '';
+                html += '<tr><td>';
+                html += '<a href="';
+                html += "/history/"+key;
+                html += '">';
+                html += key;
+                html += '</a>';
+                html += '</td>';
+                html += '<td id=lnt';
+                html += key;
+                html += '>';
+                html += lastNotiTime;
+                html += '</td>';
+                html += '<td id=status';
+                html += key;
+                html += '>';
+                html += nowStatus;
+                html += '</td>';
+                html += '</tr>';
+                $('#bdinstance').append(html);
+                
             }
-        };
-        $(document).ready(function(){
-            console.log("doc ready");
+            );
         });
-    
+    const dpRefObject = firebase.database().ref().child('users');
+    dpRefObject.on('value',snap => {
+      console.log(snap.val());
+      snap.forEach(childSnap => {
+        console.log(childSnap.val());
+        var notifications = childSnap.val().notification;
+        var ltdID = "#lnt";
+        var statusID = "#status";
+        ltdID += childSnap.key;
+        statusID += childSnap.key;
+        $(ltdID).empty();
+        $(statusID).empty();
+        var lastDateTime = "No data";
+        var statusNow = "normal";
+        var lowest;
+        var couter = 0;
+        if(notifications){
+          statusNow = childSnap.val().status;
+          Object.values(notifications).forEach( vals => {
+          if(couter == 0){
+            lowest = new Date(vals["dateTime"]);
+            lastDateTime = vals["dateTime"];
+          }
+          couter += 1;
+          var theTimeStamp = new Date(vals["dateTime"]);
+          if(theTimeStamp > lowest){
+            lastDateTime = vals["dateTime"];
+            lowest = theTimeStamp;
+          }
+        });
+        }
+        $(statusID).append(statusNow);
+        $(ltdID).append(lastDateTime);
+      });
+    });
     </script>
     </html>

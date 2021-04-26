@@ -1,0 +1,75 @@
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>TripleD</title>
+        <link rel="stylesheet" href="/css/bootstrap.min.css">
+        <script src="/js/jquery.min.js"></script>
+    </head>
+    <body>
+    <nav class="navbar navbar-light bg-info">
+      <span class="navbar-brand mb-0 mysize">Drowsiness Drive Detection</span>
+    </nav>
+    <div class="container mt-2">
+        <div class="card text-left">
+          <div class="card-body" id="hrvalue">
+            <h4 class="card-title font-weight-bold p-3 mb-2 bg-info" id="tableName" ></h4>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="bdinstance">
+              </tbody>
+            </table>
+          </div>
+        </div>
+    
+    </div>
+    </body>
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/8.4.1/firebase.js"></script>
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+<script src="https://www.gstatic.com/firebasejs/8.4.1/firebase-analytics.js"></script>
+    <script>
+      var firebaseConfig = {
+        apiKey: "AIzaSyAcp9tY7SYyJrcRhF4z8VdBW20SmJ7lZUI",
+        authDomain: "drowsiness-test.firebaseapp.com",
+        databaseURL: "https://drowsiness-test-default-rtdb.firebaseio.com",
+        projectId: "drowsiness-test",
+        storageBucket: "drowsiness-test.appspot.com",
+        messagingSenderId: "871985799913",
+        appId: "1:871985799913:web:a1b6d045b3b087feccc678",
+        measurementId: "G-4PBZQT1DR2"
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      firebase.analytics();
+      const queryUrl = window.location.href;
+      var sUrl = queryUrl.split('/');
+      var sizeOfSUrl = Object.values(sUrl).length;
+      $.get("/getAUser/"+sUrl[sizeOfSUrl-1],function (data) {
+          var tsm_list = [];
+          if(data["name"]){
+            $("#tableName").append(data["name"]);
+          }
+          if(data["notification"]){
+            var number = 0;
+            Object.values(data["notification"]).forEach(vals => {
+                var tsm = new Date(vals.dateTime);
+                tsm_list[number++] = tsm;
+            });
+          }
+          Object.values(tsm_list.sort()).forEach(times => {
+              var listTime_html = '';
+              listTime_html += '<tr><td>';
+              listTime_html += times;
+              listTime_html += '</td><tr>';
+              $("#bdinstance").append(listTime_html);
+          });
+      });
+    </script>
+    </html>
