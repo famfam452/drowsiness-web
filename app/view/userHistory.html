@@ -52,24 +52,26 @@
       var sUrl = queryUrl.split('/');
       var sizeOfSUrl = Object.values(sUrl).length;
       $.get("/getAUser/"+sUrl[sizeOfSUrl-1],function (data) {
-          var tsm_list = [];
           if(data["name"]){
             $("#tableName").append(data["name"]);
           }
           if(data["notification"]){
-            var number = 0;
-            Object.values(data["notification"]).forEach(vals => {
-                var tsm = new Date(vals.dateTime);
-                tsm_list[number++] = tsm;
+            var myl = new Array();
+            var d_n = data["notification"];
+            Object.values(d_n).forEach(vals => {
+                myl.push(vals.dateTime);
+            });
+            console.log(myl);
+            myl.sort();
+            Object.values(myl.reverse()).forEach(v => {
+                var tsm = new Date(v);
+                var listTime_html = '';
+                listTime_html += '<tr><td>';
+                listTime_html += tsm;
+                listTime_html += '</td><tr>';
+                $("#bdinstance").append(listTime_html);
             });
           }
-          Object.values(tsm_list.sort()).forEach(times => {
-              var listTime_html = '';
-              listTime_html += '<tr><td>';
-              listTime_html += times;
-              listTime_html += '</td><tr>';
-              $("#bdinstance").append(listTime_html);
-          });
       });
     </script>
     </html>

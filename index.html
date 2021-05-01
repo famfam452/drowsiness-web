@@ -21,6 +21,7 @@
                   <th>ID</th>
                   <th>Last Notify Time</th>
                   <th>Status</th>
+                  <th>Number of Times's Today</th>
                 </tr>
               </thead>
               <tbody id="bdinstance">
@@ -84,13 +85,16 @@
                 html += '<td id=lnt';
                 html += key;
                 html += '>';
-                html += lastNotiTime;
+                html += lowest;
                 html += '</td>';
                 html += '<td id=status';
                 html += key;
                 html += '>';
                 html += nowStatus;
                 html += '</td>';
+                html += '<td id=number';
+                html += key;
+                html += '>0</td>';
                 html += '</tr>';
                 $('#bdinstance').append(html);
                 
@@ -105,14 +109,20 @@
         var notifications = childSnap.val().notification;
         var ltdID = "#lnt";
         var statusID = "#status";
+        var numberID = "#number";
         ltdID += childSnap.key;
         statusID += childSnap.key;
+        numberID += childSnap.key;
         $(ltdID).empty();
         $(statusID).empty();
+        $(numberID).empty();
         var lastDateTime = "No data";
         var statusNow = "normal";
         var lowest;
         var couter = 0;
+        var toDay_cout = 0;
+        var time_now = Date.now();
+        var datetime_now = new Date(time_now);
         if(notifications){
           statusNow = childSnap.val().status;
           Object.values(notifications).forEach( vals => {
@@ -122,14 +132,19 @@
           }
           couter += 1;
           var theTimeStamp = new Date(vals["dateTime"]);
+          if(theTimeStamp.toDateString() == datetime_now.toDateString()){
+            toDay_cout++;
+          }
           if(theTimeStamp > lowest){
             lastDateTime = vals["dateTime"];
             lowest = theTimeStamp;
           }
         });
         }
+        console.log(toDay_cout);
         $(statusID).append(statusNow);
-        $(ltdID).append(lastDateTime);
+        $(ltdID).append(lowest);
+        $(numberID).append(toDay_cout);
       });
     });
     </script>
