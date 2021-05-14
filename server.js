@@ -20,10 +20,14 @@ app.use('/css', exprss.static(path.join(__dirname,'node_modules/bootstrap/dist/c
 app.use('/js', exprss.static(path.join(__dirname,'node_modules/bootstrap/dist/js')));
 app.use('/js', exprss.static(path.join(__dirname,'node_modules/jquery/dist')));
 
+const firebase_uid = 'drowsy-server'
 const firebase = new firebase_admin();
+firebase.admin.auth().createCustomToken(firebase_uid);
 // const firebase2 = new firebase_admin2();
+
 var db = firebase.admin.database();
 // var db2 = firebase2.admin.database();
+
 
 let pair = {};
 
